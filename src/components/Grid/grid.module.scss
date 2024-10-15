@@ -1,0 +1,7 @@
+.mainContainer {
+    grid-template-columns: auto auto auto;
+}
+
+.mainContainer > div {
+    align-self: center;
+}
