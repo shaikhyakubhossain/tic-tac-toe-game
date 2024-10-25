@@ -38,12 +38,15 @@ export default function Grid() {
     }
     const randomIndex = Math.floor(Math.random() * aiChoiceArr.length)
     const aiChoice = aiChoiceArr[randomIndex];
-    console.log("randomIndex: ", randomIndex);
+    // console.log("randomIndex: ", randomIndex);
     setMatrix((prev) => {
       const newMatrix = [...prev];
       newMatrix[aiChoice] = { id: 1, active: aiInput };
       return newMatrix;
     });
+    checkHorizontalWin();
+    checkVerticalWin();
+    checkDiagonalWin();
   };
 
   const handleClick = (event: React.MouseEvent) => {
@@ -56,9 +59,40 @@ export default function Grid() {
       });
       setUserTurnCount((prev) => prev + 1);
     }
-
-    console.log(matrix);
+    checkHorizontalWin();
+    checkVerticalWin();
+    checkDiagonalWin();
+    // console.log(matrix);
   };
+
+  const checkHorizontalWin = () => {
+    for(let i = 0; i < 9; i += 3) {
+      console.log("horizontal", matrix[i].active, matrix[i + 1].active, matrix[i + 2].active);
+      if(matrix[i].active === matrix[i + 1].active && matrix[i].active === matrix[i + 2].active && matrix[i].active !== -1) {
+        alert(matrix[i].active === aiInput ? "AI Win" : "you Win");
+      }
+    }
+  };
+
+  const checkVerticalWin = () => {
+    for(let i = 0; i < 3; i++) {
+      console.log("vertical", matrix[i].active, matrix[i + 3].active, matrix[i + 6].active);
+      if(matrix[i].active === matrix[i + 3].active && matrix[i].active === matrix[i + 6].active && matrix[i].active !== -1) {
+        alert(matrix[i].active === aiInput ? "AI Win" : "you Win");
+      }
+    }
+  };
+  
+  const checkDiagonalWin = () => {
+    if(matrix[0].active === matrix[4].active && matrix[0].active === matrix[8].active && matrix[0].active !== -1) {
+      alert(matrix[0].active === aiInput ? "AI Win" : "you Win");
+    }
+    else if(matrix[2].active === matrix[4].active && matrix[2].active === matrix[6].active && matrix[2].active !== -1) {
+      alert(matrix[2].active === aiInput ? "AI Win" : "you Win");
+    
+    }
+
+  }
 
   useEffect(() => {
     if (userTurnCount === 5) {
