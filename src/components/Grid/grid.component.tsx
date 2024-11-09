@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import InputX from "@/components/InputX/input-x.component";
 import InputO from "@/components/InputO/input-o.component";
 
@@ -26,7 +26,9 @@ export default function Grid() {
   const [aiInput] = useState<number>(player1Input === 1 ? 0 : 1);
   const [userTurnCount, setUserTurnCount] = useState<number>(0);
 
-  const gridBlockTW: string = `flex items-center justify-center w-20 h-20 bg-gray-300 border border-black`;
+  const gridContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const gridBlockTW: string = `flex items-center justify-center w-[88px] h-[88px] rounded-lg bg-gray-200 hover:bg-gray-300 cursor-pointer`;
 
   const easyAI = () => {
     const aiChoiceArr = [];
@@ -44,9 +46,9 @@ export default function Grid() {
       newMatrix[aiChoice] = { id: 1, active: aiInput };
       return newMatrix;
     });
-    checkHorizontalWin();
-    checkVerticalWin();
-    checkDiagonalWin();
+    checkWin("horizontal");
+    checkWin("vertical");
+    checkWin("diagonal");
   };
 
   const handleClick = (event: React.MouseEvent) => {
@@ -59,39 +61,52 @@ export default function Grid() {
       });
       setUserTurnCount((prev) => prev + 1);
     }
-    checkHorizontalWin();
-    checkVerticalWin();
-    checkDiagonalWin();
-    // console.log(matrix);
-  };
-
-  const checkHorizontalWin = () => {
-    for(let i = 0; i < 9; i += 3) {
-      console.log("horizontal", matrix[i].active, matrix[i + 1].active, matrix[i + 2].active);
-      if(matrix[i].active === matrix[i + 1].active && matrix[i].active === matrix[i + 2].active && matrix[i].active !== -1) {
-        alert(matrix[i].active === aiInput ? "AI Win" : "you Win");
-      }
-    }
-  };
-
-  const checkVerticalWin = () => {
-    for(let i = 0; i < 3; i++) {
-      console.log("vertical", matrix[i].active, matrix[i + 3].active, matrix[i + 6].active);
-      if(matrix[i].active === matrix[i + 3].active && matrix[i].active === matrix[i + 6].active && matrix[i].active !== -1) {
-        alert(matrix[i].active === aiInput ? "AI Win" : "you Win");
-      }
-    }
+    checkWin("horizontal");
+    checkWin("vertical");
+    checkWin("diagonal");
   };
   
-  const checkDiagonalWin = () => {
-    if(matrix[0].active === matrix[4].active && matrix[0].active === matrix[8].active && matrix[0].active !== -1) {
-      alert(matrix[0].active === aiInput ? "AI Win" : "you Win");
+  const checkWin = (checkType: string) => {
+    let nextIndex: number = 0;
+    let compareWith: number = 0;
+    let matched: boolean = false;
+
+    if(checkType === "diagonal") {
+      nextIndex = Math.sqrt(matrix.length) - 2;
+      compareWith = Math.sqrt(matrix.length) + 1;
     }
-    else if(matrix[2].active === matrix[4].active && matrix[2].active === matrix[6].active && matrix[2].active !== -1) {
-      alert(matrix[2].active === aiInput ? "AI Win" : "you Win");
-    
+    else if(checkType === "horizontal") {
+      nextIndex = Math.sqrt(matrix.length);
+      compareWith = 1
+    }
+    else if(checkType === "vertical") {
+      nextIndex = 1;
+      compareWith = Math.sqrt(matrix.length);
     }
 
+    for(let i = 0; i < Math.sqrt(matrix.length) - 1; i += nextIndex) {
+      for(let j = 1; j < Math.sqrt(matrix.length); j++){
+        if(checkType === "diagonal") {
+          console.log(nextIndex);
+        }
+        if(matrix[i].active === -1){
+          break;
+        }
+        // if(checkType === "diagonal" && i !== 0 && matrix[i].active === matrix[(i + 1) + (Math.sqrt(matrix.length) - 1)].active) {
+        //   matched = true;
+        //   console.log("hiii");
+        // }
+        else if(matrix[i].active ===  matrix[i + (compareWith * j)].active) {
+          matched = true;
+        }
+        else {
+          matched = false;
+        }
+      }
+  }
+  if(matched) {
+    alert('you win');
+  }
   }
 
   useEffect(() => {
@@ -104,7 +119,7 @@ export default function Grid() {
   }, [userTurnCount]);
 
   return (
-    <div className={`${styles.mainContainer} w-60 mx-auto grid`}>
+    <div ref={gridContainerRef} className={`${styles.mainContainer} mx-auto grid gap-2`}>
       {matrix.map((item, index) => {
         return (
           <div
